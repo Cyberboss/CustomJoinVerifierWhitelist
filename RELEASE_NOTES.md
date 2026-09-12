@@ -1,3 +1,7 @@
+# v1.1.1
+
+- Fix harmony patching. (@Cyberboss)
+
 # v1.1.0
 
 - Added logging. (@Cyberboss)

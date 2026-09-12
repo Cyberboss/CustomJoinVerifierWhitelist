@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using FrooxEngine;
@@ -55,40 +56,46 @@ namespace CustomJoinVerifierWhitelist
 			Config.Save(true);
 
 			Harmony harmony = new("net.dextraspace.CustomJoinVerifierWhitelist");
-			harmony.PatchAll();
+			var thisType = typeof(CustomJoinVerifierWhitelist);
+			var verifyJoinRequestPrefix = thisType.GetMethod(
+				nameof(Prefix),
+				BindingFlags.NonPublic | BindingFlags.Static
+			);
+
+			var proxyType = typeof(VerifyJoinRequest.Proxy);
+			var verifyJoinRequest = proxyType.GetMethod(
+				nameof(IUserJoinVerifier.VerifyJoinRequest)
+			);
+
+			harmony.Patch(verifyJoinRequest, prefix: new HarmonyMethod(verifyJoinRequestPrefix));
 		}
 
-		[HarmonyPatch(typeof(VerifyJoinRequest.Proxy), nameof(IUserJoinVerifier.VerifyJoinRequest))]
-		class VerifyJoinRequestProxy_VerifyJoinRequest_Patch
+		static bool Prefix(VerifyJoinRequest.Proxy __instance, SessionConnection request, ref Task<JoinGrant?> __result)
 		{
-
-			public static bool Prefix(VerifyJoinRequest.Proxy __instance, SessionConnection request, ref Task<JoinGrant?> result)
+			const string NullString = "<NULL>";
+			var userString = $"{request?.Username ?? NullString} ({request?.UserID ?? NullString})";
+			var config = Config;
+			if (config == null)
 			{
-				const string NullString = "<NULL>";
-				var userString = $"{request?.Username ?? NullString} ({request?.UserID ?? NullString})";
-				var config = Config;
-				if (config == null)
-				{
-					Warn($"Missing config during {nameof(IUserJoinVerifier.VerifyJoinRequest)} for user {userString}!");
-					return true;
-				}
-
-				if (!config.GetValue(Enabled))
-				{
-					Debug($"Mod is disabled, ignoring join request for user {userString}");
-					return true;
-				}
-
-				if (config.GetValue(BypassUserIDs)?.Contains(request?.UserID) ?? false)
-				{
-					Msg($"Configured user {userString} is bypassing the enabled custom join verifier");
-					result = Task.FromResult<JoinGrant?>(JoinGrant.Allow());
-					return false;
-				}
-
-				Msg($"User {userString} is not in the whitelist, proceeding to {nameof(VerifyJoinRequest)} Protoflux node");
+				Warn($"Missing config during {nameof(IUserJoinVerifier.VerifyJoinRequest)} for user {userString}!");
 				return true;
 			}
+
+			if (!config.GetValue(Enabled))
+			{
+				Debug($"Mod is disabled, ignoring join request for user {userString}");
+				return true;
+			}
+
+			if (config.GetValue(BypassUserIDs)?.Contains(request?.UserID) ?? false)
+			{
+				Msg($"Configured user {userString} is bypassing the enabled custom join verifier");
+				__result = Task.FromResult<JoinGrant?>(JoinGrant.Allow());
+				return false;
+			}
+
+			Msg($"User {userString} is not in the whitelist, proceeding to {nameof(VerifyJoinRequest)} Protoflux node");
+			return true;
 		}
 	}
 };
