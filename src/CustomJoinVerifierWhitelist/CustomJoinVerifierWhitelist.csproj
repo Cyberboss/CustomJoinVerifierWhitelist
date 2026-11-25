@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>14.0</LangVersion>
+    <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CopyToMods Condition="'$(CopyToMods)' == '' AND '$(Configuration)' == 'Debug'">true</CopyToMods>
@@ -16,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Resonite.GameLibs" Version="2026.11.6.1136" />
-    <PackageReference Include="ResoniteModLoader" Version="5.0.2" />
+    <PackageReference Include="ResoniteModLoader" Version="5.0.4" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(CopyToMods)'=='true'">

@@ -14,8 +14,7 @@ namespace CustomJoinVerifierWhitelist
 {
 	public sealed class CustomJoinVerifierWhitelist : ResoniteMod
 	{
-		// UPDATE VERSIONS HERE AND IN GITHUB ACTIONS. DON'T FORGET RELEASE NOTES!
-		internal const string VersionConstant = "1.1.1";
+		internal const string VersionConstant = "1.1.2";
 
 		public override string Name => "CustomJoinVerifierWhitelist";
 

@@ -1,3 +1,7 @@
+# v1.1.2
+
+- Updated to .NET 11. (@Cyberboss)
+
 # v1.1.1
 
 - Fix harmony patching. (@Cyberboss)
